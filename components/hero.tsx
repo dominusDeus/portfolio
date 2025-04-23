@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 // import ProfilePic from "../public/images/portfolio-pic.jpeg";
 // import ProfilePic from "../public/images/portfolio-pic.png";
-import ProfilePic from "../public/images/greece-pic.jpeg";
+// import ProfilePic from "../public/images/greece-pic.jpeg";
 export function Hero() {
   return (
     <section
@@ -27,7 +28,15 @@ export function Hero() {
             className="mb-8"
           >
             <Avatar className="h-48 w-48 border-4 border-primary/20 shadow-lg">
-              <AvatarImage src={ProfilePic.src} alt="Natalia Carrera" />
+              <AvatarImage asChild alt="Natalia Carrera">
+                <Image
+                  src="/images/greece-pic.jpeg"
+                  alt="Natalia Carrera"
+                  width={192}
+                  height={192}
+                  className="object-cover"
+                />
+              </AvatarImage>
               <AvatarFallback>NC</AvatarFallback>
             </Avatar>
           </motion.div>
