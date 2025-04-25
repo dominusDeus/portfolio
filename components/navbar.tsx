@@ -27,7 +27,7 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -39,8 +39,8 @@ export default function Navbar() {
       transition={{ duration: 0.5 }}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled 
-          ? "bg-background/80 backdrop-blur-md border-b shadow-sm"
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md border-b shadow-md dark:bg-gray-900"
           : "bg-transparent"
       )}
     >
@@ -48,7 +48,7 @@ export default function Navbar() {
         <Link href="#home" className="font-bold text-xl">
           Natalia Carrera
         </Link>
-        
+
         {/* Desktop navigation */}
         <nav className="hidden md:flex gap-6 items-center">
           {navItems.map((item) => (
@@ -57,7 +57,9 @@ export default function Navbar() {
               href={item.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-primary",
-                pathname === item.href ? "text-primary" : "text-muted-foreground"
+                pathname === item.href
+                  ? "text-primary"
+                  : "text-muted-foreground"
               )}
             >
               {item.name}
@@ -65,21 +67,21 @@ export default function Navbar() {
           ))}
           <ThemeToggle />
         </nav>
-        
+
         {/* Mobile menu button */}
         <div className="flex items-center gap-4 md:hidden">
           <ThemeToggle />
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X /> : <Menu />}
           </Button>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <motion.div
@@ -96,7 +98,9 @@ export default function Navbar() {
                 href={item.href}
                 className={cn(
                   "py-2 text-sm font-medium transition-colors hover:text-primary",
-                  pathname === item.href ? "text-primary" : "text-muted-foreground"
+                  pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >
