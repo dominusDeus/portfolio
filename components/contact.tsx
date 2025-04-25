@@ -11,9 +11,47 @@ import { Mail, Phone, MapPin, Send, Github, Linkedin } from "lucide-react";
 import { useState } from "react";
 import { useForm, ValidationError } from "@formspree/react";
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitRes, handleSubmit] = useForm("mldbddjg");
+  const [messageWasSent, setMessageWasSent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      subject: formData.get("subject") as string,
+      message: formData.get("message") as string,
+    } satisfies ContactFormData;
+
+    setIsSubmitting(true);
+    // Add your form submission logic here
+    try {
+      const res = fetch("https://formspree.io/f/mldbddjg", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          message: data.message,
+          subject: data.subject,
+        }),
+      });
+      setMessageWasSent(true);
+      setIsSubmitting(false);
+    } catch (e) {
+      console.log("MY CUSTOM ERROR: ", e instanceof Error ? e.message : e);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <AnimatedSection id="contact" className="bg-primary/[0.02]">
@@ -126,7 +164,7 @@ export function Contact() {
           >
             <Card className="glass-card">
               <CardContent className="p-6">
-                {submitRes.succeeded ? (
+                {messageWasSent ? (
                   <div className="text-primary h-[430px] flex flex-col justify-center items-center">
                     <p>Thank you for your interest 🩷</p>
                     <p></p>
@@ -143,6 +181,7 @@ export function Contact() {
                         </label>
                         <Input
                           id="name"
+                          name="name"
                           placeholder="Your name"
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                         />
@@ -156,6 +195,7 @@ export function Contact() {
                         </label>
                         <Input
                           id="email"
+                          name="email"
                           type="email"
                           placeholder="Your email"
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
@@ -171,6 +211,7 @@ export function Contact() {
                       </label>
                       <Input
                         id="subject"
+                        name="subject"
                         placeholder="Message subject"
                         className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                       />
@@ -184,6 +225,7 @@ export function Contact() {
                       </label>
                       <Textarea
                         id="message"
+                        name="message"
                         placeholder="Your message"
                         className="min-h-[120px] bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                       />
