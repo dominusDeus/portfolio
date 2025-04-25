@@ -29,6 +29,7 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
+    setIsScrolled(window.scrollY > 20);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

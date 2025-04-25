@@ -43,6 +43,7 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --muted-secondary: 197 37% 24% / 0.25;
   }
 
   .dark {
@@ -70,6 +71,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --muted-secondary: 320 10% 63.9%;
   }
 }
 

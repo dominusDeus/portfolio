@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send, Github, Linkedin } from "lucide-react";
 import { useState } from "react";
 import { useForm, ValidationError } from "@formspree/react";
+import { cn } from "@/lib/utils";
 
 interface ContactFormData {
   name: string;
@@ -132,17 +133,19 @@ export function Contact() {
           >
             <Card className="glass-card">
               <CardContent className="p-6">
-                {state.succeeded ? (
-                  <div className="text-primary h-[430px] flex flex-col justify-center items-center relative">
-                    <p>Thank you for your interest 🩷</p>
-                    <button
-                      onClick={() => reset()}
-                      className="pt-2 underline text-xs text-chart-3/30 font-bold"
-                    >
-                      Back to form
-                    </button>
-                  </div>
-                ) : (
+                {/* {state.succeeded ? ( */}
+                <div className="text-primary h-[430px] flex flex-col justify-center items-center relative">
+                  <p>Thank you for your interest 🩷</p>
+                  <button
+                    onClick={() => reset()}
+                    className={cn(
+                      "pt-2 underline text-xs text-muted-secondary hover:text-chart-3/3 hover:scale-110 font-bold transition-all "
+                    )}
+                  >
+                    Back to form
+                  </button>
+                </div>
+                {/* ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -244,7 +247,7 @@ export function Contact() {
                       className="text-red-500 text-sm"
                     />
                   </form>
-                )}
+                )} */}
               </CardContent>
             </Card>
           </motion.div>
