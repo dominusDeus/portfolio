@@ -9,16 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send, Github, Linkedin } from "lucide-react";
 import { useState } from "react";
+import { useForm, ValidationError } from "@formspree/react";
 
 export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    // Add your form submission logic here
-    setTimeout(() => setIsSubmitting(false), 1000);
-  };
+  const [submitRes, handleSubmit] = useForm("mldbddjg");
 
   return (
     <AnimatedSection id="contact" className="bg-primary/[0.02]">
@@ -69,7 +64,7 @@ export function Contact() {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="text-primary/90">+1 (555) 123-4567</p>
+                      <p className="text-primary/90">+54 (911) 66714437</p>
                     </div>
                   </motion.div>
 
@@ -83,7 +78,7 @@ export function Contact() {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm text-muted-foreground">Location</p>
-                      <p className="text-primary/90">San Francisco, CA</p>
+                      <p className="text-primary/90">Buenos Aires, Argentina</p>
                     </div>
                   </motion.div>
                 </div>
@@ -93,7 +88,7 @@ export function Contact() {
                   </h4>
                   <div className="flex space-x-4">
                     <a
-                      href="https://github.com"
+                      href="https://github.com/dominusDeus"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-muted h-10 w-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-muted/80 transition-colors"
@@ -131,68 +126,78 @@ export function Contact() {
           >
             <Card className="glass-card">
               <CardContent className="p-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                {submitRes.succeeded ? (
+                  <div className="text-primary h-[430px] flex flex-col justify-center items-center">
+                    <p>Thank you for your interest 🩷</p>
+                    <p></p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="name"
+                          className="text-sm text-primary/70"
+                        >
+                          Name
+                        </label>
+                        <Input
+                          id="name"
+                          placeholder="Your name"
+                          className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="email"
+                          className="text-sm text-primary/70"
+                        >
+                          Email
+                        </label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="Your email"
+                          className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
-                      <label htmlFor="name" className="text-sm text-primary/70">
-                        Name
+                      <label
+                        htmlFor="subject"
+                        className="text-sm text-primary/70"
+                      >
+                        Subject
                       </label>
                       <Input
-                        id="name"
-                        placeholder="Your name"
+                        id="subject"
+                        placeholder="Message subject"
                         className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                       />
                     </div>
                     <div className="space-y-2">
                       <label
-                        htmlFor="email"
+                        htmlFor="message"
                         className="text-sm text-primary/70"
                       >
-                        Email
+                        Message
                       </label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Your email"
-                        className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                      <Textarea
+                        id="message"
+                        placeholder="Your message"
+                        className="min-h-[120px] bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="subject"
-                      className="text-sm text-primary/70"
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary/80 hover:bg-primary text-white"
+                      disabled={isSubmitting}
                     >
-                      Subject
-                    </label>
-                    <Input
-                      id="subject"
-                      placeholder="Message subject"
-                      className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="message"
-                      className="text-sm text-primary/70"
-                    >
-                      Message
-                    </label>
-                    <Textarea
-                      id="message"
-                      placeholder="Your message"
-                      className="min-h-[120px] bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-primary/80 hover:bg-primary text-white"
-                    disabled={isSubmitting}
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
+                      <Send className="w-4 h-4 mr-2" />
+                      {isSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </motion.div>

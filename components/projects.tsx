@@ -16,6 +16,7 @@ import { Github, ExternalLink, AlertCircle } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Badge } from "./ui/badge";
+import Image from "next/image";
 
 interface Project {
   title: string;
@@ -74,11 +75,11 @@ export function Projects() {
       className="bg-primary/[0.02] dark:bg-primary/[0.02]"
     >
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-center mb-12 ">
           <SectionHeading
             title="Projects"
             subtitle="A showcase of my work and personal projects"
-            className="md:mb-0 md:items-start md:text-left"
+            className="md:mb-0 md:items-center md:text-center"
           />
         </div>
 
@@ -115,7 +116,9 @@ export function Projects() {
                 >
                   <Card className="h-full flex flex-col overflow-hidden group">
                     <div className="relative overflow-hidden h-48">
-                      <img
+                      <Image
+                        height={200}
+                        width={500}
                         src={project.image}
                         alt={project.title}
                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
