@@ -19,7 +19,7 @@ interface ContactFormData {
 }
 
 export function Contact() {
-  const [state, handleSubmit] = useForm("mldbddjg");
+  const [state, handleSubmit, reset] = useForm("mldbddjg");
 
   return (
     <AnimatedSection id="contact" className="bg-primary/[0.02]">
@@ -133,9 +133,14 @@ export function Contact() {
             <Card className="glass-card">
               <CardContent className="p-6">
                 {state.succeeded ? (
-                  <div className="text-primary h-[430px] flex flex-col justify-center items-center">
+                  <div className="text-primary h-[430px] flex flex-col justify-center items-center relative">
                     <p>Thank you for your interest 🩷</p>
-                    <p></p>
+                    <button
+                      onClick={() => reset()}
+                      className="pt-2 underline text-xs text-chart-3/30 font-bold"
+                    >
+                      Back to form
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
