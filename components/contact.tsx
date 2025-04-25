@@ -19,39 +19,7 @@ interface ContactFormData {
 }
 
 export function Contact() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [messageWasSent, setMessageWasSent] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      subject: formData.get("subject") as string,
-      message: formData.get("message") as string,
-    } satisfies ContactFormData;
-
-    setIsSubmitting(true);
-    // Add your form submission logic here
-    try {
-      const res = fetch("https://formspree.io/f/mldbddjg", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          message: data.message,
-          subject: data.subject,
-        }),
-      });
-      setMessageWasSent(true);
-      setIsSubmitting(false);
-    } catch (e) {
-      console.log("MY CUSTOM ERROR: ", e instanceof Error ? e.message : e);
-      setIsSubmitting(false);
-    }
-  };
+  const [state, handleSubmit] = useForm("mldbddjg");
 
   return (
     <AnimatedSection id="contact" className="bg-primary/[0.02]">
@@ -164,7 +132,7 @@ export function Contact() {
           >
             <Card className="glass-card">
               <CardContent className="p-6">
-                {messageWasSent ? (
+                {state.succeeded ? (
                   <div className="text-primary h-[430px] flex flex-col justify-center items-center">
                     <p>Thank you for your interest 🩷</p>
                     <p></p>
@@ -183,7 +151,14 @@ export function Contact() {
                           id="name"
                           name="name"
                           placeholder="Your name"
+                          required
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                        />
+                        <ValidationError
+                          prefix="Name"
+                          field="name"
+                          errors={state.errors}
+                          className="text-red-500 text-sm"
                         />
                       </div>
                       <div className="space-y-2">
@@ -198,7 +173,14 @@ export function Contact() {
                           name="email"
                           type="email"
                           placeholder="Your email"
+                          required
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                        />
+                        <ValidationError
+                          prefix="Email"
+                          field="email"
+                          errors={state.errors}
+                          className="text-red-500 text-sm"
                         />
                       </div>
                     </div>
@@ -213,7 +195,14 @@ export function Contact() {
                         id="subject"
                         name="subject"
                         placeholder="Message subject"
+                        required
                         className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                      />
+                      <ValidationError
+                        prefix="Subject"
+                        field="subject"
+                        errors={state.errors}
+                        className="text-red-500 text-sm"
                       />
                     </div>
                     <div className="space-y-2">
@@ -227,17 +216,28 @@ export function Contact() {
                         id="message"
                         name="message"
                         placeholder="Your message"
+                        required
                         className="min-h-[120px] bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
+                      />
+                      <ValidationError
+                        prefix="Message"
+                        field="message"
+                        errors={state.errors}
+                        className="text-red-500 text-sm"
                       />
                     </div>
                     <Button
                       type="submit"
                       className="w-full bg-primary/80 hover:bg-primary text-white"
-                      disabled={isSubmitting}
+                      disabled={state.submitting}
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {isSubmitting ? "Sending..." : "Send Message"}
+                      {state.submitting ? "Sending..." : "Send Message"}
                     </Button>
+                    <ValidationError
+                      errors={state.errors}
+                      className="text-red-500 text-sm"
+                    />
                   </form>
                 )}
               </CardContent>
