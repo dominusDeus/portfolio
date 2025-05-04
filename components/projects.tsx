@@ -30,6 +30,18 @@ interface Project {
 
 const projectsData: Project[] = [
   {
+    title: "Fitness Tracker",
+    description:
+      "A fitness tracking app that allows users to track workouts, set goals, and monitor progress.",
+    image:
+      "https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    tags: ["React Native", "TypeScript", "GraphQL", "MongoDB"],
+    links: {
+      demo: "fitness.nataliacarrera.com",
+      repo: "https://github.com/dominusDeus/bod-e-bloom-tracker",
+    },
+  },
+  {
     title: "Escuela Amor Propio",
     description:
       "An institute for personal development, mindfulness and self care.",
@@ -47,18 +59,6 @@ const projectsData: Project[] = [
     image:
       "https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     tags: ["React", "Firebase", "Redux", "Styled Components"],
-    links: {
-      demo: "https://example.com",
-      repo: "https://github.com/example/project",
-    },
-  },
-  {
-    title: "Fitness Tracker",
-    description:
-      "A fitness tracking app that allows users to track workouts, set goals, and monitor progress.",
-    image:
-      "https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    tags: ["React Native", "TypeScript", "GraphQL", "MongoDB"],
     links: {
       demo: "https://example.com",
       repo: "https://github.com/example/project",
