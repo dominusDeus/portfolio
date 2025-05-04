@@ -37,7 +37,7 @@ const projectsData: Project[] = [
       "https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     tags: ["React Native", "TypeScript", "GraphQL", "MongoDB"],
     links: {
-      demo: "fitness.nataliacarrera.com",
+      demo: "https://www.fitness.nataliacarrera.com",
       repo: "https://github.com/dominusDeus/bod-e-bloom-tracker",
     },
   },
@@ -77,6 +77,7 @@ export function Projects() {
           <SectionHeading
             title="Projects"
             subtitle="A collection of personal projects with my own designs and client work tailored to their vision."
+            g
             className="md:mb-0 md:items-center md:text-center"
           />
         </div>
