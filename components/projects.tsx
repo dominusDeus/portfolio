@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Github, ExternalLink, AlertCircle } from "lucide-react";
-import { Switch } from "./ui/switch";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Badge } from "./ui/badge";
 import Image from "next/image";
@@ -31,15 +30,14 @@ interface Project {
 
 const projectsData: Project[] = [
   {
-    title: "E-Commerce Dashboard",
+    title: "Escuela Amor Propio",
     description:
-      "A modern dashboard for e-commerce stores with real-time analytics and inventory management.",
-    image:
-      "https://images.pexels.com/photos/5082579/pexels-photo-5082579.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    tags: ["React", "Tailwind CSS", "Chart.js", "Next.js"],
+      "An institute for personal development, mindfulness and self care.",
+    image: "/images/escuela-amor-propio.png",
+    tags: ["React", "Tailwind CSS", "Next.js"],
     links: {
-      demo: "https://example.com",
-      repo: "https://github.com/example/project",
+      demo: "https://escuelaamorpropio.reml.live/",
+      // repo: "https://github.com/example/project",
     },
   },
   {
@@ -147,7 +145,7 @@ export function Projects() {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <ExternalLink className="mr-2 h-4 w-4" /> Demo
+                            <ExternalLink className="mr-2 h-4 w-4" /> Site
                           </a>
                         </Button>
                       )}

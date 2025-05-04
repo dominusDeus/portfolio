@@ -1,3 +1,4 @@
+import Favicon from "./favicon.png";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -9,6 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Natalia Carrera - Portfolio",
   description: "Professional portfolio showcasing skills and projects",
+  icons: [{ rel: "icon", url: Favicon.src }],
 };
 
 export default function RootLayout({
