@@ -77,7 +77,6 @@ export function Projects() {
           <SectionHeading
             title="Projects"
             subtitle="A collection of personal projects with my own designs and client work tailored to their vision."
-            g
             className="md:mb-0 md:items-center md:text-center"
           />
         </div>
