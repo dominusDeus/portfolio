@@ -76,7 +76,7 @@ export function Projects() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-center mb-12 ">
           <SectionHeading
             title="Projects"
-            subtitle="A showcase of my work and personal projects"
+            subtitle="A collection of personal projects with my own designs and client work tailored to their vision."
             className="md:mb-0 md:items-center md:text-center"
           />
         </div>
