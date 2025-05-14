@@ -20,7 +20,11 @@ interface ContactFormData {
 }
 
 export function Contact() {
-  const [state, handleSubmit, reset] = useForm("mldbddjg");
+  const [state, handleSubmit, reset] = useForm("manodbpd");
+
+  if (state.succeeded) {
+    return <p>Gracias por tu interés!</p>;
+  }
 
   return (
     <AnimatedSection id="contact" className="bg-primary/[0.02]">
