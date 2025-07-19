@@ -30,38 +30,35 @@ interface Project {
 
 const projectsData: Project[] = [
   {
+    title: "Travel Guide",
+    description: "A guide to help you travel your way in life.",
+    image: "/images/travelz.jpg",
+    tags: ["React", "TypeScript", "Tailwind CSS", "Next.js"],
+    links: {
+      demo: "https://travel.nataliacarrera.com",
+      repo: "https://github.com/dominusDeus/travelz",
+    },
+  },
+  {
     title: "Fitness Tracker",
     description:
       "A fitness tracking app that allows users to track workouts, set goals, and monitor progress.",
     image:
       "https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    tags: ["React Native", "TypeScript", "GraphQL", "MongoDB"],
+    tags: ["Next.JS", "TypeScript", "Firebase"],
     links: {
       demo: "https://www.fitness.nataliacarrera.com",
       repo: "https://github.com/dominusDeus/bod-e-bloom-tracker",
     },
   },
   {
-    title: "Escuela Amor Propio",
-    description:
-      "An institute for personal development, mindfulness and self care.",
-    image: "/images/escuela-amor-propio.png",
+    title: "Renacencia",
+    description: "A platform for self care and healing.",
+    image: "/images/renacencia.png",
     tags: ["React", "Tailwind CSS", "Next.js"],
     links: {
-      demo: "https://escuelaamorpropio.reml.live/",
-      // repo: "https://github.com/example/project",
-    },
-  },
-  {
-    title: "Social Media App",
-    description:
-      "A responsive social media application with post sharing, user profiles, and real-time messaging.",
-    image:
-      "https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    tags: ["React", "Firebase", "Redux", "Styled Components"],
-    links: {
-      demo: "https://example.com",
-      repo: "https://github.com/example/project",
+      demo: "https://renacencia.com",
+      repo: "https://github.com/dominusDeus/renacencia",
     },
   },
 ];
