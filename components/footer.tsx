@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="py-8 border-t">
       <div className="container px-4 md:px-6">
@@ -21,7 +21,7 @@ export function Footer() {
               &copy; {currentYear} Natalia Carrera. All rights reserved.
             </p>
             <p className="text-sm text-muted-foreground mt-2 flex items-center justify-center">
-              Made with <Heart className="h-4 w-4 text-red-500 mx-1" /> using Next.js and Tailwind CSS
+              Made with <Heart className="h-4 w-4 text-red-500 mx-1" /> by Nat
             </p>
           </motion.div>
         </div>
