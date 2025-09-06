@@ -55,11 +55,14 @@ async function sendNotificationEmail(
       oldDate ?? "N/A"
     }<br/><strong>Current:</strong> ${newDate}</p>
     <p>Link a la página: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
+    <p>Para desuscribirte, podés hacer click <a href="https://www.nataliacarrera.com/idu/formulario-inscripcion">aquí</a></p>
   `
     : `
     <p><strong>No hubo actualización en la fecha de IDUs.</strong></p>
     <p><strong>Fecha publicada:</strong> ${newDate}</p>
     <p>Link a la página: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
+    <br/><br/>
+    <p>Para desuscribirte, podés hacer click <a href="https://www.nataliacarrera.com/idu/formulario-inscripcion">aquí</a></p>
   `;
   console.log("sending email to", to);
   await resend.emails.send({ from, to, subject, html });

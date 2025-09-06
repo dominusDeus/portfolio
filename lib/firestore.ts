@@ -27,6 +27,7 @@ export type IduSubmission = {
   message?: string;
   createdAt?: unknown;
   unsubscribedAt?: unknown;
+  unsubscribeMessage?: string;
 };
 
 export async function saveContactSubmission(data: ContactSubmission) {
@@ -52,6 +53,7 @@ export type IduSubscriber = {
   email: string;
   wantsDailyUpdates: boolean;
   unsubscribedAt?: unknown;
+  unsubscribeMessage?: string;
 };
 
 function parseWantsDailyUpdates(value: string | undefined | null): boolean {
@@ -90,7 +92,10 @@ export async function listIduSubscribers(): Promise<IduSubscriber[]> {
 }
 
 // Logical unsubscribe helpers
-export async function unsubscribeIduByEmail(email: string) {
+export async function unsubscribeIduByEmail(
+  email: string,
+  unsubscribeMessage?: string
+) {
   const { db } = getFirebaseClients();
   const q = query(
     collection(db, "idu_submissions"),
@@ -101,7 +106,10 @@ export async function unsubscribeIduByEmail(email: string) {
   await Promise.all(
     snapshot.docs.map(async (d) => {
       const ref = doc(db, "idu_submissions", d.id);
-      await updateDoc(ref, { unsubscribedAt: now });
+      const updates: { [key: string]: unknown } = { unsubscribedAt: now };
+      const msg = (unsubscribeMessage || "").trim();
+      if (msg) updates.unsubscribeMessage = msg;
+      await updateDoc(ref, updates as { [x: string]: any });
     })
   );
 }

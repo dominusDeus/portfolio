@@ -31,7 +31,7 @@ function IDUPage() {
             setIsVisible(false);
           }}
           className={cn(isVisible ? "opacity-100" : "opacity-0")}
-          textColors={["#000"]}
+          textColors={["text-primary"]}
           text={[
             "Gracias por tu interés 🩷",
             "Si querés saber más sobre mí, te dejo mi página web",
@@ -193,7 +193,7 @@ function IDUPage() {
                             throw new Error(
                               "Email requerido para desuscribirse"
                             );
-                          await unsubscribeIduByEmail(email);
+                          await unsubscribeIduByEmail(email, message);
                         } else {
                           await saveIduSubmission({
                             name,
