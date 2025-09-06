@@ -46,8 +46,8 @@ async function sendNotificationEmail(
     "Natalia Carrera <idu-tracker@nataliacarrera.com>";
   const to = email;
   const subject = changed
-    ? `LMD IDU date CHANGED: ${oldDate ?? "N/A"} → ${newDate}`
-    : `LMD IDU date (no change): ${newDate}`;
+    ? `LMD IDU ACTUALIZARON!! 🎉 : ${oldDate ?? "N/A"} → ${newDate}`
+    : `LMD IDU (no hubo cambios): ${newDate}`;
   const html = changed
     ? `
     <p><strong>Hubo una actualización en la fecha de IDUs!!!</strong></p>
