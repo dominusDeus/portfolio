@@ -1,10 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
-    { "path": "/api/check-idu-secret-route-34vMyN", "schedule": "0 13 * * *" },
+    {
+      "path": "/api/check-idu-secret-route-34vMyN",
+      "schedule": "0 13 * * 1-5"
+    },
     {
       "path": "/app/api/check-idu-secret-route-34vMyN",
-      "schedule": "20 16 * * *"
+      "schedule": "30 16 * * *"
     }
   ]
 }
