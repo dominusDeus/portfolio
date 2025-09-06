@@ -13,17 +13,18 @@ import { cn } from "@/lib/utils";
 import FallingText from "@/components/ui/falling-text";
 import TextType from "@/components/ui/text-type";
 import FadeContent from "@/components/ui/fade-text";
-import { saveIduSubmission } from "@/lib/firestore";
+import { saveIduSubmission, unsubscribeIduByEmail } from "@/lib/firestore";
 
 function IDUPage() {
   const [isVisible, setIsVisible] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [succeeded, setSucceeded] = useState(false);
+  const [wantsUnsubscribe, setWantsUnsubscribe] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   if (succeeded) {
     return (
-      <div className="reltive text-3xl font-bold text-black h-screen flex justify-center items-center w-screen pb-20 ">
+      <div className="reltive text-3xl font-bold text-primary h-screen flex justify-center items-center w-screen pb-20 ">
         <TextType
           onEnded={() => {
             console.log("onEnded");
@@ -183,21 +184,34 @@ function IDUPage() {
                         const wantsValue = String(
                           data.get("wantsDailyUpdates") || ""
                         ).toLowerCase();
-                        await saveIduSubmission({
-                          name: String(data.get("name") || ""),
-                          email: String(data.get("email") || ""),
-                          wantsDailyUpdates: [
-                            "yes",
-                            "si",
-                            "sí",
-                            "true",
-                            "1",
-                            "on",
-                          ].includes(wantsValue),
-                          message: String(data.get("message") || ""),
-                        });
+                        const name = String(data.get("name") || "");
+                        const email = String(data.get("email") || "").trim();
+                        const message = String(data.get("message") || "");
+
+                        if (wantsUnsubscribe) {
+                          if (!email)
+                            throw new Error(
+                              "Email requerido para desuscribirse"
+                            );
+                          await unsubscribeIduByEmail(email);
+                        } else {
+                          await saveIduSubmission({
+                            name,
+                            email,
+                            wantsDailyUpdates: [
+                              "yes",
+                              "si",
+                              "sí",
+                              "true",
+                              "1",
+                              "on",
+                            ].includes(wantsValue),
+                            message,
+                          });
+                        }
                         setSucceeded(true);
                         formRef.current?.reset();
+                        setWantsUnsubscribe(false);
                       } catch (err) {
                         console.error("Failed to save IDU submission", err);
                       } finally {
@@ -215,6 +229,7 @@ function IDUPage() {
                           Nombre
                         </label>
                         <Input
+                          disabled={wantsUnsubscribe}
                           id="name"
                           name="name"
                           placeholder="Tu nombre"
@@ -251,6 +266,7 @@ function IDUPage() {
                         name="wantsDailyUpdates"
                         required
                         className="block w-full h-10 mt-1 rounded-md bg-primary/5 border border-primary/10 focus:border-primary/20"
+                        disabled={wantsUnsubscribe}
                       >
                         <option className="text-xs" value="yes">
                           Si
@@ -259,6 +275,22 @@ function IDUPage() {
                           No
                         </option>
                       </select>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        id="unsubscribe"
+                        name="unsubscribe"
+                        type="checkbox"
+                        className="h-4 w-4"
+                        checked={wantsUnsubscribe}
+                        onChange={(e) => setWantsUnsubscribe(e.target.checked)}
+                      />
+                      <label
+                        htmlFor="unsubscribe"
+                        className="text-sm text-primary/70"
+                      >
+                        No quiero recibir más emails (desuscribirme)
+                      </label>
                     </div>
                     <div className="space-y-2">
                       <label

@@ -3,6 +3,10 @@ import {
   addDoc,
   serverTimestamp,
   getDocs,
+  query,
+  where,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 import { getFirebaseClients } from "./firebase";
 
@@ -22,6 +26,7 @@ export type IduSubmission = {
   wantsDailyUpdates: boolean;
   message?: string;
   createdAt?: unknown;
+  unsubscribedAt?: unknown;
 };
 
 export async function saveContactSubmission(data: ContactSubmission) {
@@ -46,6 +51,7 @@ export async function saveIduSubmission(data: IduSubmission) {
 export type IduSubscriber = {
   email: string;
   wantsDailyUpdates: boolean;
+  unsubscribedAt?: unknown;
 };
 
 function parseWantsDailyUpdates(value: string | undefined | null): boolean {
@@ -77,6 +83,29 @@ export async function listIduSubscribers(): Promise<IduSubscriber[]> {
       return {
         email: String(d.email as string),
         wantsDailyUpdates: Boolean(wantsDailyUpdates),
+        unsubscribedAt: d.unsubscribedAt,
       };
-    });
+    })
+    .filter((s) => !Boolean(s.unsubscribedAt));
+}
+
+// Logical unsubscribe helpers
+export async function unsubscribeIduByEmail(email: string) {
+  const { db } = getFirebaseClients();
+  const q = query(
+    collection(db, "idu_submissions"),
+    where("email", "==", email.trim())
+  );
+  const snapshot = await getDocs(q);
+  const now = serverTimestamp();
+  await Promise.all(
+    snapshot.docs.map(async (d) => {
+      const ref = doc(db, "idu_submissions", d.id);
+      await updateDoc(ref, { unsubscribedAt: now });
+    })
+  );
+}
+
+export function isIduSubscriberActive(s: IduSubscriber): boolean {
+  return !Boolean(s.unsubscribedAt);
 }

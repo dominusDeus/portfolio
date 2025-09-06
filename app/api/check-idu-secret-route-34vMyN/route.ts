@@ -94,7 +94,11 @@ export async function GET() {
     const subscribers = await listIduSubscribers();
     await Promise.all(
       subscribers.map(async (subscriber) => {
-        const shouldSendEmail = subscriber.wantsDailyUpdates || changed;
+        // Skip if unsubscribed
+        // Note: listIduSubscribers already filters unsubscribed, this is an extra guard
+        const isUnsubscribed = Boolean((subscriber as any).unsubscribedAt);
+        const shouldSendEmail =
+          !isUnsubscribed && (subscriber.wantsDailyUpdates || changed);
         if (!shouldSendEmail) return;
         await sendNotificationEmail(
           subscriber.email,
