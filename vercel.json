@@ -4,10 +4,6 @@
     {
       "path": "/api/check-idu-secret-route-34vMyN",
       "schedule": "0 13 * * 1-5"
-    },
-    {
-      "path": "/api/check-idu-secret-route-34vMyN",
-      "schedule": "29 22 * * *"
     }
   ]
 }
