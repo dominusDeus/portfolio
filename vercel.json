@@ -7,7 +7,7 @@
     },
     {
       "path": "/app/api/check-idu-secret-route-34vMyN",
-      "schedule": "40 16 * * *"
+      "schedule": "55 16 * * *"
     }
   ]
 }

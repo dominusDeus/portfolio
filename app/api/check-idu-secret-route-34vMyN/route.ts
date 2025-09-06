@@ -61,7 +61,7 @@ async function sendNotificationEmail(
     <p><strong>Fecha publicada:</strong> ${newDate}</p>
     <p>Link a la página: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
   `;
-
+  console.log("sending email to", to);
   await resend.emails.send({ from, to, subject, html });
 }
 
@@ -95,7 +95,8 @@ export async function GET() {
     MAILING_LIST.forEach(
       async (contact: { email: string; wantsDailyUpdates: boolean }) => {
         const shouldSendEmail = contact.wantsDailyUpdates || changed;
-
+        console.log("shouldSendEmail", shouldSendEmail);
+        console.log("sending email to", contact.email);
         if (shouldSendEmail) {
           await sendNotificationEmail(
             contact.email,
