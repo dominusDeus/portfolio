@@ -312,7 +312,11 @@ function IDUPage() {
                       disabled={submitting}
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {submitting ? "Enviando..." : "Suscribite"}
+                      {submitting
+                        ? "Enviando..."
+                        : wantsUnsubscribe
+                        ? "Desuscribirme"
+                        : "Suscribirme"}
                     </Button>
                   </form>
                 )}
