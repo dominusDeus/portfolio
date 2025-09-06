@@ -1,6 +1,6 @@
 import Redis from "ioredis";
 import { Resend } from "resend";
-import { MAILING_LIST } from "@/app/constants";
+import { listIduSubscribers } from "@/lib/firestore";
 
 export const dynamic = "force-dynamic";
 
@@ -90,22 +90,19 @@ export async function GET() {
 
     const changed = lastSeen ? extracted !== lastSeen : true;
 
-    // Always send an email indicating whether the date changed
-
-    MAILING_LIST.forEach(
-      async (contact: { email: string; wantsDailyUpdates: boolean }) => {
-        const shouldSendEmail = contact.wantsDailyUpdates || changed;
-        console.log("shouldSendEmail", shouldSendEmail);
-        console.log("sending email to", contact.email);
-        if (shouldSendEmail) {
-          await sendNotificationEmail(
-            contact.email,
-            lastSeen,
-            extracted,
-            changed
-          );
-        }
-      }
+    // Fetch subscribers from Firestore and notify accordingly
+    const subscribers = await listIduSubscribers();
+    await Promise.all(
+      subscribers.map(async (subscriber) => {
+        const shouldSendEmail = subscriber.wantsDailyUpdates || changed;
+        if (!shouldSendEmail) return;
+        await sendNotificationEmail(
+          subscriber.email,
+          lastSeen,
+          extracted,
+          changed
+        );
+      })
     );
 
     // Store the latest date for next comparison (if Redis is configured)

@@ -8,18 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send, Github, Linkedin } from "lucide-react";
-import { useState } from "react";
-import { useForm, ValidationError } from "@formspree/react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import FallingText from "@/components/ui/falling-text";
 import TextType from "@/components/ui/text-type";
 import FadeContent from "@/components/ui/fade-text";
+import { saveIduSubmission } from "@/lib/firestore";
 
 function IDUPage() {
-  const [state, handleSubmit, reset] = useForm("manodbpd");
   const [isVisible, setIsVisible] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  if (state.succeeded) {
+  if (succeeded) {
     return (
       <div className="reltive text-3xl font-bold text-black h-screen flex justify-center items-center w-screen pb-20 ">
         <TextType
@@ -33,8 +35,8 @@ function IDUPage() {
             "Gracias por tu interés 🩷",
             "Si querés saber más sobre mí, te dejo mi página web",
           ]}
-          typingSpeed={75}
-          pauseDuration={1000}
+          typingSpeed={85}
+          pauseDuration={800}
           showCursor={true}
           cursorCharacter="|"
           loop={false}
@@ -163,23 +165,47 @@ function IDUPage() {
           >
             <Card className="glass-card">
               <CardContent className="p-6">
-                {state.succeeded ? (
+                {succeeded ? (
                   <div className="text-primary h-[430px] flex flex-col justify-center items-center relative">
                     <p>
                       Gracias por tu interés y sigámos ayudándonos entre
                       nosotros 🩷
                     </p>
-                    {/* <button
-                      onClick={() => reset()}
-                      className={cn(
-                        "pt-2 underline text-xs text-muted-secondary hover:text-chart-3/3 hover:scale-110 font-bold transition-all "
-                      )}
-                    >
-                      Back to form
-                    </button> */}
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form
+                    ref={formRef}
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      setSubmitting(true);
+                      try {
+                        const data = new FormData(e.currentTarget);
+                        const wantsValue = String(
+                          data.get("wantsDailyUpdates") || ""
+                        ).toLowerCase();
+                        await saveIduSubmission({
+                          name: String(data.get("name") || ""),
+                          email: String(data.get("email") || ""),
+                          wantsDailyUpdates: [
+                            "yes",
+                            "si",
+                            "sí",
+                            "true",
+                            "1",
+                            "on",
+                          ].includes(wantsValue),
+                          message: String(data.get("message") || ""),
+                        });
+                        setSucceeded(true);
+                        formRef.current?.reset();
+                      } catch (err) {
+                        console.error("Failed to save IDU submission", err);
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label
@@ -194,12 +220,6 @@ function IDUPage() {
                           placeholder="Tu nombre"
                           required
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
-                        />
-                        <ValidationError
-                          prefix="name"
-                          field="name"
-                          errors={state.errors}
-                          className="text-red-500 text-sm"
                         />
                       </div>
                       <div className="space-y-2">
@@ -217,34 +237,28 @@ function IDUPage() {
                           required
                           className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
                         />
-                        <ValidationError
-                          prefix="Email"
-                          field="email"
-                          errors={state.errors}
-                          className="text-red-500 text-sm"
-                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label
-                        htmlFor="subject"
-                        className="text-sm text-primary/70"
+                        htmlFor="wantsDailyUpdates"
+                        className="text-sm text-primary/70 block"
                       >
-                        Mails diarios o solo si hay actualizaciones
+                        {`Querés recibir mails diarios? (Seleccionar "No" te enviará mails solo cuando haya actualizaciones)`}
                       </label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        placeholder="Tu preferencia"
+                      <select
+                        id="wantsDailyUpdates"
+                        name="wantsDailyUpdates"
                         required
-                        className="bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
-                      />
-                      <ValidationError
-                        prefix="Subject"
-                        field="subject"
-                        errors={state.errors}
-                        className="text-red-500 text-sm"
-                      />
+                        className="block w-full h-10 mt-1 rounded-md bg-primary/5 border border-primary/10 focus:border-primary/20"
+                      >
+                        <option className="text-xs" value="yes">
+                          Si
+                        </option>
+                        <option className="text-xs" value="no">
+                          No
+                        </option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <label
@@ -257,28 +271,17 @@ function IDUPage() {
                         id="message"
                         name="message"
                         placeholder="Tu comentario"
-                        required
                         className="min-h-[120px] bg-primary/5 border-primary/10 focus:border-primary/20 placeholder:text-primary/30"
-                      />
-                      <ValidationError
-                        prefix="Message"
-                        field="message"
-                        errors={state.errors}
-                        className="text-red-500 text-sm"
                       />
                     </div>
                     <Button
                       type="submit"
                       className="w-full bg-primary/80 hover:bg-primary text-white"
-                      disabled={state.submitting}
+                      disabled={submitting}
                     >
                       <Send className="w-4 h-4 mr-2" />
-                      {state.submitting ? "Enviando..." : "Suscribite"}
+                      {submitting ? "Enviando..." : "Suscribite"}
                     </Button>
-                    <ValidationError
-                      errors={state.errors}
-                      className="text-red-500 text-sm"
-                    />
                   </form>
                 )}
               </CardContent>
