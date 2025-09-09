@@ -1,8 +1,20 @@
 import Redis from "ioredis";
 import { Resend } from "resend";
 import { listIduSubscribers } from "@/lib/firestore";
+import pThrottle from "p-throttle";
 
 export const dynamic = "force-dynamic";
+const apiKey = process.env.RESEND_API_KEY;
+const resend = new Resend(apiKey);
+
+const throttle = pThrottle({
+  limit: 1,
+  interval: 1000,
+});
+
+const throttled = throttle((...args: Parameters<typeof resend.emails.send>) =>
+  resend.emails.send(...args)
+);
 
 const TARGET_URL =
   "https://www.exteriores.gob.es/Consulados/buenosaires/es/Comunicacion/Noticias/Paginas/Articulos/202200907_NOT02.aspx";
@@ -35,12 +47,6 @@ async function sendNotificationEmail(
   newDate: string,
   changed: boolean
 ) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn("RESEND_API_KEY is not set; skipping email notification.");
-    return;
-  }
-  const resend = new Resend(apiKey);
   const from =
     process.env.RESEND_FROM ||
     "Natalia Carrera <idu-tracker@nataliacarrera.com>";
@@ -65,7 +71,12 @@ async function sendNotificationEmail(
     <p>Para desuscribirte, podés hacer click <a href="https://www.nataliacarrera.com/idu/formulario-inscripcion">aquí</a></p>
   `;
   console.log("sending email to", to);
-  await resend.emails.send({ from, to, subject, html });
+  // Resend SDK returns { data, error }
+
+  const result = (await throttled({ from, to, subject, html })) as
+    | { data?: { id?: string } | null; error?: { message?: string } | null }
+    | unknown;
+  return result as any;
 }
 
 export async function GET() {
@@ -95,6 +106,9 @@ export async function GET() {
 
     // Fetch subscribers from Firestore and notify accordingly
     const subscribers = await listIduSubscribers();
+    const successes: string[] = [];
+    const failures: { email: string; error: unknown }[] = [];
+
     await Promise.all(
       subscribers.map(async (subscriber) => {
         // Skip if unsubscribed
@@ -102,13 +116,32 @@ export async function GET() {
         const isUnsubscribed = Boolean((subscriber as any).unsubscribedAt);
         const shouldSendEmail =
           !isUnsubscribed && (subscriber.wantsDailyUpdates || changed);
-        if (!shouldSendEmail) return;
-        await sendNotificationEmail(
-          subscriber.email,
-          lastSeen,
-          extracted,
-          changed
-        );
+        if (!shouldSendEmail) {
+          console.log(
+            `skip sending to ${subscriber.email}: unsubscribed=${isUnsubscribed} wantsDailyUpdates=${subscriber.wantsDailyUpdates} changed=${changed}`
+          );
+          return;
+        }
+        try {
+          const res = (await sendNotificationEmail(
+            subscriber.email,
+            lastSeen,
+            extracted,
+            changed
+          )) as any;
+          const errMsg = res?.error?.message;
+          const mailId = res?.data?.id;
+          if (errMsg) {
+            console.error(`send failed for ${subscriber.email}: ${errMsg}`);
+            failures.push({ email: subscriber.email, error: errMsg });
+          } else {
+            console.log(`sent to ${subscriber.email}: id=${mailId ?? "n/a"}`);
+            successes.push(subscriber.email);
+          }
+        } catch (error) {
+          console.error(`send failed for ${subscriber.email}`, error);
+          failures.push({ email: subscriber.email, error });
+        }
       })
     );
 
@@ -117,12 +150,19 @@ export async function GET() {
       await redis.set(KV_KEY, extracted);
     }
 
-    return new Response(
-      changed
-        ? `Email sent (changed): ${lastSeen ?? "N/A"} -> ${extracted}`
-        : `Email sent (no change): ${extracted}`,
-      { status: 200 }
-    );
+    const summary = {
+      changed,
+      lastSeen: lastSeen ?? "N/A",
+      current: extracted,
+      attempted: subscribers.length,
+      sent: successes.length,
+      failed: failures.length,
+      failures,
+    };
+    return new Response(JSON.stringify(summary), {
+      status: failures.length > 0 ? 207 : 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (error) {
     console.error("Handler error", error);
     return new Response("Internal error", { status: 500 });
