@@ -4,3 +4,9 @@ export const MAILING_LIST = [
     wantsDailyUpdates: true,
   },
 ];
+export const TEST_SUBSCRIBERS = [
+  {
+    email: "nataliacarrera.ads@gmail.com",
+    wantsDailyUpdates: true,
+  },
+];

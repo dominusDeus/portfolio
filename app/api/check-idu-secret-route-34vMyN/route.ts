@@ -18,33 +18,71 @@ const throttled = throttle((...args: Parameters<typeof resend.emails.send>) =>
 
 const TARGET_URL =
   "https://www.exteriores.gob.es/Consulados/buenosaires/es/Comunicacion/Noticias/Paginas/Articulos/202200907_NOT02.aspx";
-const KV_KEY = "idu_last_seen_date";
-const DEFAULT_DATE = "15/02/2024";
+const KV_KEY = "idu_schedule_signature_v2";
+const DEFAULT_SIGNATURE = "";
 
 // Create Redis client from REDIS_URL (Redis Cloud or equivalent). Reuse across invocations.
 const redisUrl = process.env.REDIS_URL;
 const redis = redisUrl ? new Redis(redisUrl) : null;
 
-function extractDateFromHtml(html: string): string | null {
-  // Tolerant regex: look for the key phrase and capture dd/mm/yyyy inside a span
-  const pattern =
-    /IDU[sS]?\s+registrados\s+al[\s\S]*?<span[^>]*>\s*(\d{2}[\/-]\d{2}[\/-]\d{4})\s*<\/span>/i;
-  const match = html.match(pattern);
-  if (match && match[1]) {
-    // Normalize separator to '/'
-    return match[1].replace(/-/g, "/");
+type ScheduleEntry = {
+  month: string;
+  range: string;
+  cutoff: string;
+};
+
+function parseScheduleFromHtml(html: string): ScheduleEntry[] {
+  const entries: ScheduleEntry[] = [];
+
+  const normalized = html
+    .replace(/\r/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\t/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  const monthName =
+    "Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre";
+  const monthRegex = new RegExp(`(${monthName})\\s+\\d{4}`, "gi");
+  const rangeRegex = /desde\s+NW-\d{4}-\d{5,6}\s+hasta\s+NW-\d{4}-\d{5,6}/i;
+  const cutoffRegex = /registrados\s+hasta\s+(\d{2}[\/-]\d{2}[\/-]\d{4})/i;
+
+  let match: RegExpExecArray | null;
+  const monthMatches: { text: string; index: number }[] = [];
+  while ((match = monthRegex.exec(normalized)) !== null) {
+    monthMatches.push({ text: match[0], index: match.index });
   }
-  // Fallback: broader date search near the headline
-  const vicinityPattern =
-    /se\s+han\s+habilitado\s+los\s+IDU[sS]?.{0,300}?(\d{2}[\/-]\d{2}[\/-]\d{4})/i;
-  const near = html.match(vicinityPattern);
-  return near ? near[1].replace(/-/g, "/") : null;
+
+  for (let i = 0; i < monthMatches.length; i++) {
+    const current = monthMatches[i];
+    const next = monthMatches[i + 1];
+    const sliceEnd = next
+      ? next.index
+      : Math.min(current.index + 1500, normalized.length);
+    const vicinity = normalized.slice(current.index, sliceEnd);
+
+    const rangeMatch = vicinity.match(rangeRegex);
+    const cutoffMatch = vicinity.match(cutoffRegex);
+
+    if (rangeMatch) {
+      const rangeText = rangeMatch[0].replace(/\s+/g, " ");
+      const cutoffText = cutoffMatch
+        ? `registrados hasta ${cutoffMatch[1].replace(/\-/g, "/")}`
+        : "registrados hasta N/D";
+      entries.push({
+        month: current.text,
+        range: rangeText,
+        cutoff: cutoffText,
+      });
+    }
+  }
+
+  return entries;
 }
 
 async function sendNotificationEmail(
   email: string,
-  oldDate: string | null,
-  newDate: string,
+  schedule: ScheduleEntry[],
   changed: boolean
 ) {
   const from =
@@ -52,22 +90,25 @@ async function sendNotificationEmail(
     "Natalia Carrera <idu-tracker@nataliacarrera.com>";
   const to = email;
   const subject = changed
-    ? `LMD IDU ACTUALIZARON!! 🎉 : ${oldDate ?? "N/A"} → ${newDate}`
-    : `LMD IDU (no hubo cambios): ${newDate}`;
-  const html = changed
-    ? `
-    <p><strong>Hubo una actualización en la fecha de IDUs!!!</strong></p>
-    <p><strong>Fecha publicada:</strong> ${
-      oldDate ?? "N/A"
-    }<br/><strong>Current:</strong> ${newDate}</p>
-    <p>Link a la página: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
-    <p>Para desuscribirte, podés hacer click <a href="https://www.nataliacarrera.com/idu/formulario-inscripcion">aquí</a></p>
-  `
-    : `
-    <p><strong>No hubo actualización en la fecha de IDUs.</strong></p>
-    <p><strong>Fecha publicada:</strong> ${newDate}</p>
-    <p>Link a la página: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
-    <br/><br/>
+    ? `LMD IDU: NUEVAS HABILITACIONES 🎉`
+    : `LMD IDU: sin cambios (última información)`;
+
+  const listItems = schedule
+    .map(
+      (e) =>
+        `<li><strong>${e.month}</strong>: ${e.range}<br/><em>${e.cutoff}</em></li>`
+    )
+    .join("");
+
+  const html = `
+    ${
+      changed
+        ? "<p><strong>Se detectaron cambios en las habilitaciones de IDU.</strong></p>"
+        : "<p><strong>No hubo cambios desde el último chequeo.</strong></p>"
+    }
+    <p>Próximas habilitaciones publicadas:</p>
+    <ul>${listItems}</ul>
+    <p>Fuente: <a href="${TARGET_URL}">${TARGET_URL}</a></p>
     <p>Para desuscribirte, podés hacer click <a href="https://www.nataliacarrera.com/idu/formulario-inscripcion">aquí</a></p>
   `;
   console.log("sending email to", to);
@@ -91,18 +132,23 @@ export async function GET() {
       return new Response(`Fetch failed: ${response.status}`, { status: 502 });
     }
     const html = await response.text();
-    const extracted = extractDateFromHtml(html);
-    if (!extracted) {
-      console.warn("Could not extract date from HTML.");
-      return new Response("No date found", { status: 200 });
+    const schedule = parseScheduleFromHtml(html);
+    if (!schedule || schedule.length === 0) {
+      console.warn("Could not extract schedule from HTML.");
+      return new Response("No schedule found", { status: 200 });
     }
 
-    // Read last seen date from Redis if available; fall back to default on first run
+    // Build a signature from schedule for change detection
+    const signature = schedule
+      .map((e) => `${e.month}|${e.range}|${e.cutoff}`)
+      .join(";");
+
+    // Read last seen signature from Redis if available; fall back to default on first run
     const lastSeen = redis
       ? ((await redis.get(KV_KEY)) as string | null)
-      : DEFAULT_DATE;
+      : DEFAULT_SIGNATURE;
 
-    const changed = lastSeen ? extracted !== lastSeen : true;
+    const changed = lastSeen ? signature !== lastSeen : true;
 
     // Fetch subscribers from Firestore and notify accordingly
     const subscribers = await listIduSubscribers();
@@ -110,7 +156,9 @@ export async function GET() {
     const failures: { email: string; error: unknown }[] = [];
 
     await Promise.all(
-      subscribers.map(async (subscriber) => {
+      (
+        await await subscribers
+      ).map(async (subscriber) => {
         // Skip if unsubscribed
         // Note: listIduSubscribers already filters unsubscribed, this is an extra guard
         const isUnsubscribed = Boolean((subscriber as any).unsubscribedAt);
@@ -125,8 +173,7 @@ export async function GET() {
         try {
           const res = (await sendNotificationEmail(
             subscriber.email,
-            lastSeen,
-            extracted,
+            schedule,
             changed
           )) as any;
           const errMsg = res?.error?.message;
@@ -145,15 +192,16 @@ export async function GET() {
       })
     );
 
-    // Store the latest date for next comparison (if Redis is configured)
+    // Store the latest signature for next comparison (if Redis is configured)
     if (redis) {
-      await redis.set(KV_KEY, extracted);
+      await redis.set(KV_KEY, signature);
     }
 
     const summary = {
       changed,
       lastSeen: lastSeen ?? "N/A",
-      current: extracted,
+      signature,
+      schedule,
       attempted: subscribers.length,
       sent: successes.length,
       failed: failures.length,
